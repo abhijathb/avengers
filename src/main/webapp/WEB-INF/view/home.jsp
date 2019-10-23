@@ -77,6 +77,10 @@
 th, td {
 	padding: 0 5px;
 }
+
+#contentContainer{
+padding: 30px 50px;
+}
 </style>
 </head>
 
@@ -150,7 +154,8 @@ th, td {
 	<!-- <div class="slider">
 </div> -->
 
-	<h3 style="padding-left: 10px; padding-top: 10px;">Hello,
+<div id="contentContainer">
+	<h3>Hello,
 		${fn:toUpperCase(username)} ! Know more about the country before
 		saving them...</h3>
 	<hr>
@@ -180,6 +185,6 @@ th, td {
 	</div>
 	
 	<input id="contextPath" type="hidden" value="${pageContext.request.contextPath}"/>
-
+</div>
 </body>
 </html>
