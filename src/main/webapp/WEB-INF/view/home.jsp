@@ -31,6 +31,13 @@
 <script>
 	function getCountryDetails(code) {
 		document.getElementById('countryDetails').innerHTML = code;
+		$.ajax($('#contextPath').val()+'/api/user/'+code,   // request url
+			    {
+			        success: function (data, status, xhr) {// success callback function
+			            $('#countryDetails').val(data);
+			            document.getElementById('countryDetails').innerHTML = JSON.stringify(data);
+			    }
+			});
 	}
 </script>
 <style>
@@ -153,7 +160,7 @@ th, td {
 			onclick="getCountryDetails('${cty.code}')">${cty.name}</button>
 	</c:forEach>
 
-	<div id="countryDetails" style="width:50px;height:50px;overflow:auto;"></div>
+	<div id="countryDetails" style="width:900px;height:200px;overflow:auto;"></div>
 	<hr>
 	<div id="chatMessages">
 		<table>
@@ -171,6 +178,8 @@ th, td {
 			</c:forEach>
 		</table>
 	</div>
+	
+	<input id="contextPath" type="hidden" value="${pageContext.request.contextPath}"/>
 
 </body>
 </html>
