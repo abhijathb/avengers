@@ -33,10 +33,15 @@ public class UserRestController {
 		return userService.findAll();
 	}
 
-	@GetMapping("/{countryCode}")
+	@GetMapping("/country/{countryCode}")
 	public Country getCountryDetails(@PathVariable String countryCode) {
 		String restAPIString = "https://restcountries.eu/rest/v2/alpha/{0}";
 		Country country = restTemplate.getForObject(MessageFormat.format(restAPIString, countryCode), Country.class);
 		return country;
+	}
+	
+	@GetMapping("/{username}")
+	public User getUserDetails(@PathVariable String username) {
+		return userService.findByName(username);
 	}
 }

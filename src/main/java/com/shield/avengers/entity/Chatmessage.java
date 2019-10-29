@@ -10,6 +10,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 @Entity
 @Table(name = "chatmessages")
@@ -20,6 +22,7 @@ public class Chatmessage {
 	@Column(name = "id")
 	private long id;
 	@Column(name = "loggedtime")
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date loggedtime;
 	@Column(name = "message")
 	private String message;

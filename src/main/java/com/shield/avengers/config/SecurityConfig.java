@@ -12,31 +12,36 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 
 @Configuration
 @EnableWebSecurity
-@ComponentScan(basePackages="com.shield.avengers")
+@ComponentScan(basePackages = "com.shield.avengers")
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Autowired
 	private DataSource securityDataSource;
-	
+
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		/*auth.inMemoryAuthentication()
-		.withUser("user").password("password").roles("USER")
-		.and()
-		.withUser("admin").password("admin").roles("USER", "ADMIN");*/
-		
+		/*
+		 * auth.inMemoryAuthentication()
+		 * .withUser("user").password("password").roles("USER") .and()
+		 * .withUser("admin").password("admin").roles("USER", "ADMIN");
+		 */
+
 		auth.jdbcAuthentication().dataSource(securityDataSource);
 	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.authorizeRequests()
-		//.antMatchers("/","/public/**", "/resources/**","/resources/static/**")
-		.antMatchers("/img/**","/css/**").permitAll()
-        .anyRequest().authenticated()
-		.and()
-		.formLogin().loginPage("/login").loginProcessingUrl("/authenticate")
-		.permitAll();
-		//.httpBasic();
+		http
+		.csrf().disable()
+		.authorizeRequests()
+				// .antMatchers("/","/public/**",
+				// "/resources/**","/resources/static/**")
+				.antMatchers("/img/**", "/css/**").permitAll()
+				.anyRequest().authenticated()
+				.and()
+				.formLogin().loginPage("/login").loginProcessingUrl("/authenticate").permitAll()
+				.and()
+				.logout().permitAll();
+		// .httpBasic();
 	}
 }

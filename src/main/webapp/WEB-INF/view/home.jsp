@@ -31,13 +31,37 @@
 <script>
 	function getCountryDetails(code) {
 		document.getElementById('countryDetails').innerHTML = code;
-		$.ajax($('#contextPath').val()+'/api/user/'+code,   // request url
-			    {
-			        success: function (data, status, xhr) {// success callback function
-			            $('#countryDetails').val(data);
-			            document.getElementById('countryDetails').innerHTML = JSON.stringify(data);
-			    }
-			});
+		$.ajax($('#contextPath').val() + '/api/user/country/' + code, // request url
+		{
+			success : function(data, status, xhr) {// success callback function
+				$('#countryDetails').val(data);
+				document.getElementById('countryDetails').innerHTML = JSON
+						.stringify(data);
+			}
+		});
+	}
+
+	function sendMessage() {
+		var msgObj = new Object();
+		msgObj.id = null;
+		msgObj.loggedtime = null;
+		msgObj.message = $('#textChatmessage').val();
+		msgObj.from_user = null;
+		msgObj.to_user = $('#toUser').val();
+		$.ajax({
+			contentType : 'application/json',
+			data : JSON.stringify(msgObj),
+			dataType : 'json',
+			success : function(data) {
+				console.log("message sending succeeded");
+			},
+			error : function() {
+				console.log("message sending failed");
+			},
+			processData : false,
+			type : 'POST',
+			url : $('#contextPath').val() + '/api/chatmessage/send'
+		});
 	}
 </script>
 <style>
@@ -57,14 +81,16 @@
 
 @media screen and (min-width: 992px) {
 	.navbar {
-		height: 130px;
+		height: 90px;
 		background: #123; /*#6080af;*/
 	}
 	#logo {
 		/*   width: 260px;
     height: 120px; */
 		position: relative;
-		bottom: -20px;
+		bottom: 0px;
+		//-20
+		px
 	}
 	.navbar-light .navbar-nav .nav-link {
 		padding-right: 75px;
@@ -78,8 +104,34 @@ th, td {
 	padding: 0 5px;
 }
 
-#contentContainer{
-padding: 30px 50px;
+#contentContainer {
+	padding: 30px 50px;
+}
+
+#chatMessageList {
+	width: 60%;
+	float: left;
+}
+
+#chatMessageCompose {
+	width: 40%;
+	float: left;
+}
+
+#welcomeAvenger {
+	width: 90%;
+	float: left;
+}
+
+#logoutAvenger {
+	width: 10%;
+	float: right;
+}
+
+#countryDetails {
+	width: 900px;
+	height: 120px;
+	overflow: auto;
 }
 </style>
 </head>
@@ -154,37 +206,69 @@ padding: 30px 50px;
 	<!-- <div class="slider">
 </div> -->
 
-<div id="contentContainer">
-	<h3>Hello,
-		${fn:toUpperCase(username)} ! Know more about the country before
-		saving them...</h3>
-	<hr>
-	<c:forEach items="${countryList}" var="cty">
-		<button type="button" class="btn"
-			style="background: #123; color: white"
-			onclick="getCountryDetails('${cty.code}')">${cty.name}</button>
-	</c:forEach>
+	<div id="contentContainer">
+		<div id="welcomeAvenger">
+			<h3>Welcome, ${fn:toUpperCase(username)} ! Know more about the
+				country before saving them...</h3>
+		</div>
+		<div id=logoutAvenger"">
+			<form action="${pageContext.request.contextPath}/logout"
+				method="POST" class="form-horizontal">
 
-	<div id="countryDetails" style="width:900px;height:200px;overflow:auto;"></div>
-	<hr>
-	<div id="chatMessages">
-		<table>
-			<tr>
-				<th>Time</th>
-				<th>From</th>
-				<th>Message</th>
-			</tr>
-			<c:forEach items="${messageList}" var="msg">
+				<input type="submit" class="btn"
+					style="background: red; color: white" value="Logout" />
+			</form>
+		</div>
+		<hr>
+		<c:forEach items="${countryList}" var="cty">
+			<button type="button" class="btn"
+				style="background: #123; color: white"
+				onclick="getCountryDetails('${cty.code}')">${cty.name}</button>
+		</c:forEach>
+
+		<div id="countryDetails"></div>
+		<hr>
+		<div id="chatMessageList">
+			<table>
 				<tr>
-					<td>${msg.loggedtime}</td>
-					<td>${fn:toUpperCase(msg.from_user.username)}</td>
-					<td>${msg.message}</td>
+					<th>Time</th>
+					<th>From</th>
+					<th>Message</th>
 				</tr>
-			</c:forEach>
-		</table>
+				<c:forEach items="${messageList}" var="msg">
+					<tr>
+						<td>${msg.loggedtime}</td>
+						<td>${fn:toUpperCase(msg.from_user.username)}</td>
+						<td>${msg.message}</td>
+					</tr>
+				</c:forEach>
+			</table>
+		</div>
+
+		<div id="chatMessageCompose">
+			<table>
+				<tr>
+					<td><select id="toUser">
+							<c:forEach items="${userList}" var="usr">
+								<option value="${usr.username}">${usr.username}</option>
+							</c:forEach>
+					</select></td>
+				</tr>
+				<tr>
+					<td><textarea id="textChatmessage" rows="5" cols="50"></textarea>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<button type="button" class="btn"
+							style="background: yellow; color: black" onclick="sendMessage()">Send</button>
+					</td>
+				</tr>
+			</table>
+		</div>
+
+		<input id="contextPath" type="hidden"
+			value="${pageContext.request.contextPath}" />
 	</div>
-	
-	<input id="contextPath" type="hidden" value="${pageContext.request.contextPath}"/>
-</div>
 </body>
 </html>
