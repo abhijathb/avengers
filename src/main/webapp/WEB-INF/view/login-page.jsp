@@ -38,7 +38,7 @@
 				
 					 <div class="panel-title" style="float:right">Sign In</div> 
 				</div> -->
-				<img class="img-responsive center-block" src="${pageContext.request.contextPath}/img/logo.png" alt="" width="72" height="72">
+				<img class="img-responsive center-block" src="${pageContext.request.contextPath}/img/alogo.png" alt="" width="72" height="72">
 
 				<div style="padding-top: 30px" class="panel-body">
 

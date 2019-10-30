@@ -7,8 +7,11 @@ import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -59,5 +62,22 @@ public class ChatmessageController {
 		chatmessage.setMessage(payload.get("message").textValue());
 		chatmessage.setLoggedtime(new Date());
 		return chatmessageService.save(chatmessage);
+	}
+
+	@PutMapping("/")
+	public Chatmessage update(@RequestBody String stringPayload) throws JsonMappingException, JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode payload = mapper.readTree(stringPayload);
+		logger.info(payload.toPrettyString());
+		Chatmessage chatmessage = chatmessageService.getById(Long.parseLong(payload.get("id").textValue()));
+		logger.info(chatmessage.toString());
+		logger.info("chatmessage.setMessage >>" + chatmessage.getMessage());
+		chatmessage.setMessage(payload.get("message").textValue());
+		return chatmessageService.update(chatmessage);
+	}
+
+	@DeleteMapping("/{id}")
+	public int delete(@PathVariable long id) throws JsonMappingException, JsonProcessingException {
+		return chatmessageService.delete(id);
 	}
 }

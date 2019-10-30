@@ -41,8 +41,9 @@ public class ChatmessageDAOImpl implements ChatmessageDAO {
 
 	@Override
 	public Chatmessage update(Chatmessage chatmessage) {
-		// TODO Auto-generated method stub
-		return null;
+		Session session = entityManager.unwrap(Session.class);
+		session.saveOrUpdate(chatmessage);
+		return chatmessage;
 	}
 
 	@Override
@@ -67,8 +68,11 @@ public class ChatmessageDAOImpl implements ChatmessageDAO {
 
 	@Override
 	public Chatmessage getById(long id) {
-		// TODO Auto-generated method stub
-		return null;
+		Session session = entityManager.unwrap(Session.class);
+		Chatmessage chatmessage = (Chatmessage) session
+				.createQuery("from Chatmessage c where c.id = ?1")
+				.setParameter(1, id).list().get(0);
+		return chatmessage;
 	}
 
 }

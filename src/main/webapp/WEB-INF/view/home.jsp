@@ -28,42 +28,6 @@
 
 <script
 	src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
-<script>
-	function getCountryDetails(code) {
-		document.getElementById('countryDetails').innerHTML = code;
-		$.ajax($('#contextPath').val() + '/api/user/country/' + code, // request url
-		{
-			success : function(data, status, xhr) {// success callback function
-				$('#countryDetails').val(data);
-				document.getElementById('countryDetails').innerHTML = JSON
-						.stringify(data);
-			}
-		});
-	}
-
-	function sendMessage() {
-		var msgObj = new Object();
-		msgObj.id = null;
-		msgObj.loggedtime = null;
-		msgObj.message = $('#textChatmessage').val();
-		msgObj.from_user = null;
-		msgObj.to_user = $('#toUser').val();
-		$.ajax({
-			contentType : 'application/json',
-			data : JSON.stringify(msgObj),
-			dataType : 'json',
-			success : function(data) {
-				console.log("message sending succeeded");
-			},
-			error : function() {
-				console.log("message sending failed");
-			},
-			processData : false,
-			type : 'POST',
-			url : $('#contextPath').val() + '/api/chatmessage/send'
-		});
-	}
-</script>
 <style>
 .slider {
 	height: 400px;
@@ -133,6 +97,16 @@ th, td {
 	height: 120px;
 	overflow: auto;
 }
+
+#errorText {
+	color: red;
+	font-size: 12px;
+}
+
+#successText {
+	color: green;
+	font-size: 12px;
+}
 </style>
 </head>
 
@@ -161,7 +135,7 @@ th, td {
     </div> -->
 
 		<a class="navbar-brand mx-auto" href="#"> <!-- <div id="logo"></div> -->
-			<img id="logo" src="${pageContext.request.contextPath}/img/logo.png"
+			<img id="logo" src="${pageContext.request.contextPath}/img/alogo.png"
 			alt="" width="72" height="72">
 		</a>
 
@@ -211,7 +185,7 @@ th, td {
 			<h3>Welcome, ${fn:toUpperCase(username)} ! Know more about the
 				country before saving them...</h3>
 		</div>
-		<div id=logoutAvenger"">
+		<div id="logoutAvenger">
 			<form action="${pageContext.request.contextPath}/logout"
 				method="POST" class="form-horizontal">
 
@@ -220,12 +194,13 @@ th, td {
 			</form>
 		</div>
 		<hr>
-		<c:forEach items="${countryList}" var="cty">
-			<button type="button" class="btn"
-				style="background: #123; color: white"
-				onclick="getCountryDetails('${cty.code}')">${cty.name}</button>
-		</c:forEach>
-
+		<div style="float:left">
+			<c:forEach items="${countryList}" var="cty">
+				<button type="button" class="btn"
+					style="background: #123; color: white"
+					onclick="getCountryDetails('${cty.code}')">${cty.name}</button>
+			</c:forEach>
+		</div>
 		<div id="countryDetails"></div>
 		<hr>
 		<div id="chatMessageList">
@@ -234,12 +209,20 @@ th, td {
 					<th>Time</th>
 					<th>From</th>
 					<th>Message</th>
+					<th></th>
+					<th></th>
 				</tr>
 				<c:forEach items="${messageList}" var="msg">
-					<tr>
+					<tr id="msg${msg.id}">
 						<td>${msg.loggedtime}</td>
 						<td>${fn:toUpperCase(msg.from_user.username)}</td>
 						<td>${msg.message}</td>
+						<td><a><img alt="Edit message"
+								src="${pageContext.request.contextPath}/icons/edit12679e.png"
+								onclick="editMessage('${msg.id}')" /> </a></td>
+						<td><a><img alt="Delete message"
+								src="${pageContext.request.contextPath}/icons/deletec0392b.png"
+								onclick="deleteMessage('${msg.id}')" /> </a></td>
 					</tr>
 				</c:forEach>
 			</table>
@@ -260,9 +243,19 @@ th, td {
 				</tr>
 				<tr>
 					<td>
-						<button type="button" class="btn"
+						<button id="sendMessage" type="button" class="btn"
 							style="background: yellow; color: black" onclick="sendMessage()">Send</button>
+
+						<button id="saveMessage" type="button" class="btn"
+							style="background: yellow; color: black">Save</button>
+						<button id="cancelSaveMessage" type="button" class="btn"
+							style="background: yellow; color: black"
+							onclick="cancelSaveMessage()">Cancel</button>
 					</td>
+				</tr>
+				<tr>
+					<td><p id="errorText"></p>
+						<p id="successText"></p></td>
 				</tr>
 			</table>
 		</div>
@@ -271,4 +264,107 @@ th, td {
 			value="${pageContext.request.contextPath}" />
 	</div>
 </body>
+<script>
+	$(document).ready(function() {
+		$('#saveMessage').hide();
+		$('#cancelSaveMessage').hide();
+	});
+
+	function getCountryDetails(code) {
+		document.getElementById('countryDetails').innerHTML = code;
+		$.ajax($('#contextPath').val() + '/api/user/country/' + code, // request url
+		{
+			success : function(data, status, xhr) {// success callback function
+				$('#countryDetails').val(data);
+				document.getElementById('countryDetails').innerHTML = JSON
+						.stringify(data);
+			}
+		});
+	}
+
+	function sendMessage() {
+		resetResultText();
+		var msgObj = new Object();
+		msgObj.id = null;
+		msgObj.loggedtime = null;
+		msgObj.message = $('#textChatmessage').val();
+		msgObj.from_user = null;
+		msgObj.to_user = $('#toUser').val();
+		$.ajax({
+			contentType : 'application/json',
+			data : JSON.stringify(msgObj),
+			dataType : 'json',
+			success : function(data) {
+				$('#successText').text("message sending succeeded");
+			},
+			error : function() {
+				$('#errorText').text("message sending failed");
+			},
+			processData : false,
+			type : 'POST',
+			url : $('#contextPath').val() + '/api/chatmessage/send'
+		});
+	}
+
+	function deleteMessage(id) {
+		resetResultText();
+		var result = confirm("Are you sure you want to delete this message?");
+		if (result) {
+			$.ajax({
+				success : function(data) {
+					$('#successText').text("message delete succeeded");
+				},
+				error : function() {
+					$('#errorText').text("message delete failed");
+				},
+				type : 'DELETE',
+				url : $('#contextPath').val() + '/api/chatmessage/' + id
+			});
+		}
+	}
+
+	function editMessage(id) {
+		resetResultText();
+		$("#toUser").hide();
+		$("#sendMessage").hide();
+		$("#textChatmessage").text($("#msg" + id + " td:nth-child(3)").text());
+		$("#saveMessage").show();
+		$('#cancelSaveMessage').show();
+		$("#saveMessage").attr("onclick", "saveMessage('" + id + "')");
+	}
+
+	function cancelSaveMessage() {
+		resetResultText();
+		$("#saveMessage").hide();
+		$('#cancelSaveMessage').hide();
+		$("#toUser").show();
+		$("#textChatmessage").text('');
+		$("#sendMessage").show();
+	}
+
+	function saveMessage(id) {
+		resetResultText();
+		var msgObj = new Object();
+		msgObj.id = id;
+		msgObj.message = $('#textChatmessage').val();
+		$.ajax({
+			contentType : 'application/json',
+			dataType : 'json',
+			data : JSON.stringify(msgObj),
+			success : function(data) {
+				$('#successText').text("message update succeeded");
+			},
+			error : function() {
+				$('#errorText').text("message update failed");
+			},
+			type : 'PUT',
+			url : $('#contextPath').val() + '/api/chatmessage/'
+		});
+	}
+	
+	function resetResultText(){
+		$('#successText').text("");
+		$('#errorText').text("");
+	}
+</script>
 </html>
